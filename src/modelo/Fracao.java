@@ -1,21 +1,37 @@
 package modelo;
 
-class Fracao {
+public class Fracao implements Comparable<Fracao>{
 
   private int numerador;
   private int denominador;
 
-  Fracao(int numerador, int denominador) {
+  public void construtor(int numerador, int denominador){
     this.numerador = numerador;
+    if(denominador == 0) denominador = 1;
     this.denominador = denominador;
     this.simplificar();
   }
 
-  int getNumerador() {
+  public Fracao(int numerador, int denominador) {
+    this.construtor(numerador, denominador);
+  }
+
+  public Fracao(String fracao) {
+    int[] fracaoInt = this.tratarFracaoString(fracao);
+    this.construtor(fracaoInt[0], fracaoInt[1]);
+  }
+  
+
+  public Fracao(double decimal) {
+    int[] fracaoInt = this.tratarFracaoDouble(decimal);
+    this.construtor(fracaoInt[0], fracaoInt[1]);
+  }
+
+  public int getNumerador() {
     return this.numerador;
   }
 
-  int getDenominador() {
+  public int getDenominador() {
     return this.denominador;
   }
 
@@ -48,7 +64,28 @@ class Fracao {
     return (n1 / mdc(n1, n2)) * n2;
   }
 
-  String getString() {
+  public int[] tratarFracaoString(String fracao){
+    String[] fracaoArray = fracao.split("/");
+    int[] fracaoInt = {Integer.parseInt(fracaoArray[0]), Integer.parseInt(fracaoArray[1])};
+    return fracaoInt;
+  }
+
+  public int[] tratarFracaoDouble(double decimal){
+    int denominador = 1;
+    
+    while(decimal % 1 != 0){
+      
+      decimal *= 10;
+      //System.out.println("decimal % 10 " + decimal % 10);
+      //System.out.println("decimal " + decimal);
+      denominador *= 10; 
+    }
+   // System.out.println("denominador " + denominador);
+    int[] fracaoInt = {(int) decimal, denominador};
+    return fracaoInt;
+  }
+
+  public String getString() {
     return this.numerador + "/" + this.denominador;
   }
 
@@ -57,25 +94,45 @@ class Fracao {
     return this.getString();
   }
 
-  public static void main(String... paraFinsDeTesteApenas) {
-    Fracao f1 = new Fracao(3, 4);
-    System.out.println(f1);
+  public void somar(int inteiro) {
+    inteiro *= this.denominador;
+    this.numerador += inteiro;
+    this.simplificar();
+  }
 
-    Fracao f2 = new Fracao(144, 12);
-    System.out.println(f2);
+  public void somar(double decimal) {
+    int[] fracaoInt = this.tratarFracaoDouble(decimal);
+    this.somar(fracaoInt);
+  }
 
-    Fracao f3 = new Fracao(18, 8);
-    System.out.println(f3);
+  public void somar(String fracao) {
+    int[] fracaoInt = this.tratarFracaoString(fracao);
+    this.somar(fracaoInt);
+  }
 
-    f1.somar(f2);
-    System.out.println(f1);
+  public void somar(int[] fracaoInt){
+    int mmc = mmc(this.denominador, fracaoInt[1]);
+    fracaoInt[0] *= (mmc / fracaoInt[1]);
+    this.numerador *= (mmc / this.denominador);
+    this.numerador += fracaoInt[0];;
+    this.denominador = mmc;
+    this.simplificar();
+  }
 
-    f2.somar(f3);
-    System.out.println(f2);
+  @Override
+  public  boolean equals(Object fracao){
+    if(this.numerador == ((Fracao)fracao).getNumerador() && this.denominador == ((Fracao)fracao).getDenominador()) return true;
+    return false;
+  }
 
-    Fracao f5 = new Fracao(3, 9);
-    f5.somar(new Fracao(4, 8));
-    System.out.println(f5);
-
+  public int compareTo(Fracao fracao) {
+    int num = this.numerador;
+    int num2 = fracao.getNumerador();
+    int mmc = mmc(this.denominador, fracao.getDenominador());
+    num *= (mmc / this.denominador);
+    num2 *= (mmc / fracao.getDenominador());
+    if(num > num2) return 1;
+    if(num < num2) return -1;
+    return 0;
   }
 }
